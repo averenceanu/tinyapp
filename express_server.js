@@ -36,13 +36,11 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase }; 
   res.render('urls_index', templateVars);
-  console.log(templateVars, "this is templateVars");
 });
 
 app.get('/urls/new', (req, res) => {
   res.render('urls_new')
 });
-
 
 app.post("/urls", (req, res) => {
   let randomString = generateRandomString();
@@ -65,4 +63,3 @@ app.get("/u/:shortURL", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
