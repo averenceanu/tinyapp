@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 app.set('view engine', 'ejs')
 app.use(bodyParser.urlencoded({extended: true}))
 
-const generateRansomString = function (){
+const generateRandomString = function (){
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   let randomStr = "";
   for (let i = 0; i < 6; i++) {
@@ -43,14 +43,21 @@ app.get('/urls/new', (req, res) => {
   res.render('urls_new')
 });
 
-app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
-  res.render("urls_show", templateVars);
-});
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); //log the POST request body to the console
-  res.send("Ok");
+  let randomString = generateRandomString();
+  urlDatabase[randomString] = req.body.longURL;
+
+  //Object.assign(urlDatabase, {[randomString]: req.body.longURL}); //new shortURL added to database 
+  res.redirect(`/urls/${randomString}`)
+  // const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
+  // res.render("urls_show", templateVars);
+});
+
+app.get("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[shortURL]};
+  res.render("urls_show", templateVars);
 });
 
 app.listen(PORT, () => {
