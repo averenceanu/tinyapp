@@ -11,13 +11,20 @@
       </div>
     </div>
     <div>
-      <form method="POST" action="/login"> 
-          <input 
-            type="text"
-            name="username"
-            value="username"/>
-          <button class="btn btn-outline-dark">Login</button>
-      </form>
+      <% if (username){ %>
+        <p>Logged in as: <%= username %> 
+          <form method="POST" action="/logout"> <button class="btn btn-outline-dark">Logout</button>
+          </form>
+        </p>
+        <% } else { %>
+          <form method="POST" action="/login"> 
+            <input class="form-control mr-sm-2" placeholder="Search" aria-label="Search"
+              type="text"
+              name="username"
+              value="username"/>
+            <button class="btn btn-outline-dark">Login</button>
+        </form>
+       <% }%> 
     </div>
   </nav>
 </header>
