@@ -43,7 +43,8 @@ app.get("/urls", (req, res) => {
 
 //Create new URL
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new')
+  const templateVars = { urls: urlDatabase, username: req.cookies["username"] }; 
+  res.render('urls_new', templateVars)
 });
 
 //When submit botton clicked > generate new shortURL > redirect to urls/newShortURL
