@@ -2,9 +2,11 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
 
 app.set('view engine', 'ejs')
 app.use(bodyParser.urlencoded({extended: true}))
+app.use(cookieParser());
 
 const generateRandomString = function (){
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -83,6 +85,13 @@ app.post("/urls/:shortURL", (req, res) => {
   //extract the new longURL 
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect('/urls');
+});
+
+//When login button clicked
+app.post("/login", (req, res) => {
+  let username = req.body.username; 
+  res.cookie("Username", username);
+  res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
