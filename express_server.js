@@ -8,7 +8,7 @@ app.set('view engine', 'ejs')
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(cookieParser());
 
-//////////////////////////////// GENERATE RANDOM STRING FUNCTION  //////////////////////////////// 
+//////////////////////////////// FUNCTIONS  //////////////////////////////// 
 
 const generateRandomString = function (){
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -30,6 +30,14 @@ const generateRandomID = function (){
   return randomStr;
 };
 
+const checkIfEmailExists = function (database, enteredEmail) {
+  for (let user in database) {
+    if (database[user].email === enteredEmail) {
+      return true; 
+    }
+  }
+  return false;
+};
 //////////////////////////////// DATABASE //////////////////////////////// 
 
 const urlDatabase = {
@@ -144,16 +152,17 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   const userID = generateRandomID(); 
-  users[userID] = { id: userID, email:req.body.email, password:req.body.password}; //addind the new registration to users database 
-  console.log("users Database:", users); 
-  
-  //if e-mail or password is an empty string > send back and error 400 
   let enteredEmail = req.body.email; 
   const enteredPassword = req.body.password; 
   if (enteredEmail.length <= 0 || enteredPassword.length <= 0) {
     res.write("400. That's an error. Please enter a valid email address and password.");
     res.end();
+  } else if (checkIfEmailExists(users, enteredEmail)) {
+    res.write("400. That's an error. This email is used by another account.");
+    res.end();
   } else {
+    users[userID] = { id: userID, email:req.body.email, password:req.body.password}; //addind the new registration to users database 
+    console.log("users Database:", users); 
     res.cookie("user_id", userID);
     res.redirect("/urls");
   }
