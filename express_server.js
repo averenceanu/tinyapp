@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
@@ -41,7 +42,7 @@ const checkIfEmailExists = function(database, enteredEmail) {
 
 const checkIfPasswordExists = function(database, enteredPassword) {
   for (let user in database) {
-    if (database[user].password === enteredPassword) {
+    if (bcrypt.compareSync(enteredPassword, database[user].password)) {
       return true;
     }
   }
@@ -85,12 +86,12 @@ const users = {
   "001" : {
     id: "001",
     email: "alex@example.com",
-    password: "hello1",
+    password: bcrypt.hashSync("hello1", 10) //"hello1",
   },
   "002": {
     id: "002",
     email: "alice@example.com",
-    password: "hello2"
+    password: bcrypt.hashSync("hello2", 10) //"hello2",
   }
 };
 
@@ -196,9 +197,12 @@ app.post("/register", (req, res) => {
     res.status(400).send("That's an error. This email is used by another account.");
     res.end();
   } else {
-    users[userID] = { id: userID, email:req.body.email, password:req.body.password}; //addind the new registration to users database
+    const password = req.body.password; 
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    users[userID] = { id: userID, email:req.body.email, password:hashedPassword }; //addind the new registration to users database
     res.cookie("user_id", userID);
     res.redirect("/urls");
+    console.log("users database", users)
   }
 });
 
@@ -212,6 +216,7 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const enteredEmail = req.body.email;
   const enteredPassword = req.body.password;
+  
   if (!checkIfEmailExists(users, enteredEmail)) {
     res.status(403).send("E-mail cannot be found.");
     res.end();
