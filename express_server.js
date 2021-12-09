@@ -200,6 +200,9 @@ app.post("/redirect", (req, res) => {
   res.redirect("/login");
 })
 
+app.post("/redirect", (req, res) => {
+  res.redirect("/login");
+})
 ////////////////////////////// PORT  //////////////////////////////
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
