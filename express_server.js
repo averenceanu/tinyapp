@@ -149,7 +149,7 @@ app.post("/urls/:shortURL/edit", (req, res) =>{
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   //extract the new longURL
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL].longURL = req.body.longURL;
   res.redirect('/urls');
 });
 
@@ -212,9 +212,6 @@ app.post("/redirect", (req, res) => {
   res.redirect("/login");
 })
 
-app.post("/redirect", (req, res) => {
-  res.redirect("/login");
-})
 ////////////////////////////// PORT  //////////////////////////////
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
