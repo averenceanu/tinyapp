@@ -47,13 +47,28 @@ const checkIfPasswordExists = function(database, enteredPassword) {
   }
   return false;
 };
+
+//returns ID based on the email key of the object
+const identifyID = function(database, enteredEmail){  
+  for (let user in database){
+    if (database[user].email === enteredEmail){
+      let userID = database[user].id
+      return userID;
+    }
+  }
+}
+
+//will return an object where key = shortURL, value = longURL
+const urlsForEachUser = function (database, userID){
+  let urlsObject = {};
+  for (let url in database){
+    if (database[url].userID === userID){
+      urlsObject[url] = database[url].longURL;
+    }
+  }
+  return urlsObject;
+}
 //////////////////////////////// DATABASE ////////////////////////////////
-
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
 const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
@@ -96,24 +111,27 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   const userID = req.cookies["user_id"];
   const user = users[userID];
-  const templateVars = { urls: urlDatabase, user };
+  const thisUserURL = urlsForEachUser(urlDatabase, userID)
+  const templateVars = { urls: urlDatabase, user, thisUserURL };
+  console.log("urlsDatabase", urlDatabase)
   res.render('urls_index', templateVars);
 });
 
-//////////////////////////////// FUNCTIONAL SHORT URL ////////////////////////////////
+//////////////////////////////// FUNCTIONAL: SHORTEN URL ////////////////////////////////
 
 // Create new short URL
 app.get('/urls/new', (req, res) => {
   const userID = req.cookies["user_id"];
   const user = users[userID];
-  const templateVars = { urls: urlDatabase, user };
+  //let thisUserURL = urlsForEachUser(urlDatabase, userID)
+  const templateVars = { urls: urlDatabase, user } // thisUserURL };
   res.render('urls_new', templateVars);
 });
 
 //When submit botton clicked > generate new shortURL > redirect to urls/newShortURL
 app.post("/urls", (req, res) => {
   let randomString = generateRandomString();
-  urlDatabase[randomString] = req.body.randomString.longURL;
+  urlDatabase[randomString]= {longURL: req.body.longURL, userID: req.cookies["user_id"]};
   res.redirect(`/urls/${randomString}`);
 });
 
@@ -122,6 +140,15 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const userID = req.cookies["user_id"];
   const user = users[userID];
+  if (!user){
+    res.status(403).send("Please login to access this page.");
+    return;
+  }
+  if (urlDatabase[shortURL].userID !== userID){
+    console.log("Please")
+    res.status(403).send("You cannot access this page!");
+    return;
+  }
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[shortURL].longURL, user };
   res.render("urls_show", templateVars);
 });
@@ -147,10 +174,9 @@ app.post("/urls/:shortURL/edit", (req, res) =>{
 
 //When updating longURl
 app.post("/urls/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
-  //extract the new longURL
-  urlDatabase[shortURL].longURL = req.body.longURL;
-  res.redirect('/urls');
+  const shortURL = req.params.shortURL; 
+  urlDatabase[shortURL].longURL = req.body.longURL; 
+  res.redirect('/urls'); 
 });
 
 ////////////////////////////// REGISTRATION //////////////////////////////
@@ -164,10 +190,10 @@ app.post("/register", (req, res) => {
   const enteredEmail = req.body.email;
   const enteredPassword = req.body.password;
   if (enteredEmail.length <= 0 || enteredPassword.length <= 0) {
-    res.send(400).send("That's an error. Please enter a valid email address and password.");
+    res.status(400).send("That's an error. Please enter a valid email address and password.");
     res.end();
   } else if (checkIfEmailExists(users, enteredEmail)) {
-    res.send(400).send("That's an error. This email is used by another account.");
+    res.status(400).send("That's an error. This email is used by another account.");
     res.end();
   } else {
     users[userID] = { id: userID, email:req.body.email, password:req.body.password}; //addind the new registration to users database
@@ -184,7 +210,6 @@ app.get("/login", (req, res) => {
 
 //When login button clicked
 app.post("/login", (req, res) => {
-  const userID = generateRandomID();
   const enteredEmail = req.body.email;
   const enteredPassword = req.body.password;
   if (!checkIfEmailExists(users, enteredEmail)) {
@@ -195,6 +220,7 @@ app.post("/login", (req, res) => {
     res.status(403).send("Password does not match.");
     res.end();
   } else {
+    const userID = identifyID(users, enteredEmail);
     users[userID] = { id: userID, email:req.body.email, password:req.body.password}; //assigning a new ID to user
     res.cookie("user_id", userID);
     res.redirect("/urls");
