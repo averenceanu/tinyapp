@@ -7,24 +7,24 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 
-    <title>Registration</title>
+    <title>Login</title>
   </head>
 
   <body>
     <%- include('partials/_header') %>
     
-    <form method="POST" action="/register">
-      <h2>Create Account</h2>
+    <form method="POST" action="/login">
+      <h2>Login</h2>
     </br>
       <h5>Email address</h5>
       <input type="email" name="email" placeholder="Email address"> 
     </br>
-    </br> 
+    </br>
       <h5>Password</h5>  
-      <input type="password" name="password" placeholder="Password">
+      <input type="password" name="password" placeholder="Password"> 
     </br>
     </br>
-      <button type="submit" class="btn btn-primary">Register</button>
+      <button type="submit" class="btn btn-primary">Login</button>
     </form>
   </body>
 </html>

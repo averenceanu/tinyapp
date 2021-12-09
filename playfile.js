@@ -1,16 +1,16 @@
 //create a function that will loop through and object properties
-//loop if the element given is found in the object given 
+//loop if the element given is found in the object given
 
-//the function should take in 2 paramented (the object to loop through) + the element to compaire through 
+//the function should take in 2 paramented (the object to loop through) + the element to compaire through
 
-const checkIfEmailExists = function (database, enteredEmail) {
+const checkIfEmailExists = function(database, enteredEmail) {
   for (let user in database) {
     if (database[user].email === enteredEmail) {
-      return true; 
+      return true;
     }
   }
   return false;
-}; 
+};
 
 
 const database = {
