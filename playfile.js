@@ -1,28 +1,21 @@
-//create a function that will loop through and object properties
-//loop if the element given is found in the object given
-
-//the function should take in 2 paramented (the object to loop through) + the element to compaire through
-
-const checkIfEmailExists = function(database, enteredEmail) {
-  for (let user in database) {
-    if (database[user].email === enteredEmail) {
-      return true;
-    }
-  }
-  return false;
-};
-
-
-const database = {
-  "001" : {
-    id: "001",
-    email: "alex@example.com",
-    password: "hello1",
+const urlDatabase = {
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "001"
   },
-  "002": {
-    id: "002",
-    email: "alice@example.com",
-    password: "hello2"
+
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "001"
   }
 };
-console.log(checkIfEmailExists(database, "yev@example.com"));
+
+console.log(urlDatabase["b2xVn2"].longURL)
+
+
+const urlDatabase1 = {
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
+};
+
+console.log(urlDatabase1["b2xVn2"])

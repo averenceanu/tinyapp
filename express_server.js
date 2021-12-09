@@ -49,9 +49,21 @@ const checkIfPasswordExists = function(database, enteredPassword) {
 };
 //////////////////////////////// DATABASE ////////////////////////////////
 
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "001"
+  },
+
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "001"
+  }
 };
 
 const users = {
@@ -101,7 +113,7 @@ app.get('/urls/new', (req, res) => {
 //When submit botton clicked > generate new shortURL > redirect to urls/newShortURL
 app.post("/urls", (req, res) => {
   let randomString = generateRandomString();
-  urlDatabase[randomString] = req.body.longURL;
+  urlDatabase[randomString] = req.body.randomString.longURL;
   res.redirect(`/urls/${randomString}`);
 });
 
@@ -110,14 +122,14 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const userID = req.cookies["user_id"];
   const user = users[userID];
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[shortURL], user };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[shortURL].longURL, user };
   res.render("urls_show", templateVars);
 });
 
 //When clicked on newShortURL > redirects to longURL web page;
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -152,10 +164,10 @@ app.post("/register", (req, res) => {
   const enteredEmail = req.body.email;
   const enteredPassword = req.body.password;
   if (enteredEmail.length <= 0 || enteredPassword.length <= 0) {
-    res.write("400. That's an error. Please enter a valid email address and password.");
+    res.send(400).send("That's an error. Please enter a valid email address and password.");
     res.end();
   } else if (checkIfEmailExists(users, enteredEmail)) {
-    res.write("400. That's an error. This email is used by another account.");
+    res.send(400).send("That's an error. This email is used by another account.");
     res.end();
   } else {
     users[userID] = { id: userID, email:req.body.email, password:req.body.password}; //addind the new registration to users database
@@ -176,11 +188,11 @@ app.post("/login", (req, res) => {
   const enteredEmail = req.body.email;
   const enteredPassword = req.body.password;
   if (!checkIfEmailExists(users, enteredEmail)) {
-    res.write("403. E-mail cannot be found.");
+    res.status(403).send("E-mail cannot be found.");
     res.end();
   }
   if (!checkIfPasswordExists(users, enteredPassword)) {
-    res.write("403. Password does not match.");
+    res.status(403).send("Password does not match.");
     res.end();
   } else {
     users[userID] = { id: userID, email:req.body.email, password:req.body.password}; //assigning a new ID to user
