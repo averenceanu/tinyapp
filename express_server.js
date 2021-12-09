@@ -2,12 +2,16 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['b10783d2-24ed-4a30-9b84-9c10ea429bfd', 'f56a87b1-5588-4f8a-beb0-3e1b06aa40e2',] 
+}));  
 
 //////////////////////////////// FUNCTIONS  ////////////////////////////////
 
@@ -110,7 +114,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   const user = users[userID];
   const thisUserURL = urlsForEachUser(urlDatabase, userID)
   const templateVars = { urls: urlDatabase, user, thisUserURL };
@@ -122,7 +126,7 @@ app.get("/urls", (req, res) => {
 
 // Create new short URL
 app.get('/urls/new', (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   const user = users[userID];
   //let thisUserURL = urlsForEachUser(urlDatabase, userID)
   const templateVars = { urls: urlDatabase, user } // thisUserURL };
@@ -132,14 +136,14 @@ app.get('/urls/new', (req, res) => {
 //When submit botton clicked > generate new shortURL > redirect to urls/newShortURL
 app.post("/urls", (req, res) => {
   let randomString = generateRandomString();
-  urlDatabase[randomString]= {longURL: req.body.longURL, userID: req.cookies["user_id"]};
+  urlDatabase[randomString]= {longURL: req.body.longURL, userID: req.session["user_id"]};
   res.redirect(`/urls/${randomString}`);
 });
 
 //Page with the newShortURL
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const userID = req.cookies["user_id"];
+  const userID = req.session["user_id"];
   const user = users[userID];
   if (!user){
     res.status(403).send("Please login to access this page.");
@@ -200,7 +204,7 @@ app.post("/register", (req, res) => {
     const password = req.body.password; 
     const hashedPassword = bcrypt.hashSync(password, 10);
     users[userID] = { id: userID, email:req.body.email, password:hashedPassword }; //addind the new registration to users database
-    res.cookie("user_id", userID);
+    req.session.user_id = userID; 
     res.redirect("/urls");
     console.log("users database", users)
   }
@@ -227,14 +231,14 @@ app.post("/login", (req, res) => {
   } else {
     const userID = identifyID(users, enteredEmail);
     users[userID] = { id: userID, email:req.body.email, password:req.body.password}; //assigning a new ID to user
-    res.cookie("user_id", userID);
+    req.session.user_id = userID; 
     res.redirect("/urls");
   }
 });
 
 ////////////////////////////// LOGOUT //////////////////////////////
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session['user_id'] = null;
   res.redirect("/urls");
 });
 

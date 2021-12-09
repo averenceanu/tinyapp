@@ -1,13 +1,14 @@
 
 const checkIfPasswordExists = function(database, enteredPassword) {
   for (let user in database) {
-    if (database[user].password === enteredPassword) {
-      return true;
+    if(bcrypt.compareSync(enteredPassword, database[user].password)){
+     return true;
     }
   }
   return false;
 };
 
 
+if (database[user].password === enteredPassword) {}
 
 bcrypt.compareSync(enteredPassword, database[user].password)
