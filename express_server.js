@@ -4,8 +4,8 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
-const { checkIfEmailExists, generateRandomString, generateRandomID, checkIfPasswordExists, identifyID, urlsForEachUser } = require('./helpers');
-
+const salt = bcrypt.genSaltSync(10);
+const { generateRandomString, generateRandomID, urlsForEachUser, getUserByEmail } = require('./helpers');
 
 //////////////////////////////// MIDDLEWARE ////////////////////////////////
 app.set('view engine', 'ejs');
@@ -32,19 +32,19 @@ const users = {
   "001" : {
     id: "001",
     email: "alex@example.com",
-    password: bcrypt.hashSync("hello1", 10) //"hello1",
+    password: "hello1",
   },
   "002": {
     id: "002",
     email: "alice@example.com",
-    password: bcrypt.hashSync("hello2", 10) //"hello2",
+    password: "hello2",
   }
 };
 
 ////////////////////////////////////////////////////////////////
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect('/urls');
 });
 
 app.get("/urls.json", (req, res) => {
@@ -58,7 +58,7 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   const userID = req.session["user_id"];
   const user = users[userID];
-  const thisUserURL = urlsForEachUser(urlDatabase, userID)
+  const thisUserURL = urlsForEachUser(urlDatabase, userID);
   const templateVars = { urls: urlDatabase, user, thisUserURL };
   res.render('urls_index', templateVars);
 });
@@ -69,8 +69,7 @@ app.get("/urls", (req, res) => {
 app.get('/urls/new', (req, res) => {
   const userID = req.session["user_id"];
   const user = users[userID];
-  //let thisUserURL = urlsForEachUser(urlDatabase, userID)
-  const templateVars = { urls: urlDatabase, user } // thisUserURL };
+  const templateVars = { urls: urlDatabase, user }; 
   res.render('urls_new', templateVars);
 });
 
@@ -137,11 +136,12 @@ app.post("/register", (req, res) => {
   if (enteredEmail.length <= 0 || enteredPassword.length <= 0) {
     res.status(400).send("That's an error. Please enter a valid email address and password.");
     res.end();
-  } else if (checkIfEmailExists(users, enteredEmail)) {
-    console.log(checkIfEmailExists(users, enteredEmail))
+  } 
+  if (getUserByEmail(enteredEmail, users)){
     res.status(400).send("That's an error. This email is used by another account.");
     res.end();
-  } else {
+  }
+  else {
     const password = req.body.password; 
     const hashedPassword = bcrypt.hashSync(password, 10);
     users[userID] = { id: userID, email:req.body.email, password:hashedPassword }; //addind the new registration to users database
@@ -160,16 +160,20 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const enteredEmail = req.body.email;
   const enteredPassword = req.body.password;
-  
-  if (!checkIfEmailExists(users, enteredEmail)) {
+  const userID = getUserByEmail(enteredEmail, users);
+  const targetedUserPassword = users[userID].password;
+  console.log(targetedUserPassword);
+
+  if (!userID){
     res.status(403).send("E-mail cannot be found.");
     res.end();
   }
-  if (!checkIfPasswordExists(users, enteredPassword)) {
+  if (bcrypt.compareSync(enteredPassword,targetedUserPassword)) {
     res.status(403).send("Password does not match.");
     res.end();
-  } else {
-    const userID = identifyID(users, enteredEmail);
+  }
+  else {
+    //const userID = identifyID(users, enteredEmail);
     users[userID] = { id: userID, email:req.body.email, password:req.body.password}; //assigning a new ID to user
     req.session.user_id = userID; 
     res.redirect("/urls");

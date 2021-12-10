@@ -1,6 +1,6 @@
 const { assert } = require('chai');
 
-const { checkIfEmailExists } = require('../helpers.js');
+const { getUserByEmail } = require('../helpers.js');
 
 const testUsers = {
   "userRandomID": {
@@ -15,15 +15,15 @@ const testUsers = {
   }
 };
 
-describe('checkIfEmailExists', function() {
-  it('should return true if an user with this email exists', function() {
-    const user = checkIfEmailExists(testUsers, "user@example.com")
-    const expectedAnswer = true;
+describe('getUserByEmail', function() {
+  it('should return an user witha valid email', function() {
+    const user = getUserByEmail("user@example.com", testUsers)
+    const expectedAnswer = "userRandomID";
     assert.strictEqual(user, expectedAnswer)
   });
-  it('should return false if an user with this email does not exists', function() {
-    const user = checkIfEmailExists(testUsers, "user3@example.com")
-    const expectedAnswer = false;
+  it('should return undefined if user does not exists', function() {
+    const user = getUserByEmail("user333@example.com", testUsers)
+    const expectedAnswer = undefined;
     assert.strictEqual(user, expectedAnswer)
   });
 });
