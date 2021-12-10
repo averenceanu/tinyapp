@@ -40,5 +40,5 @@ const urlsForEachUser = function (database, userID){
   return urlsObject;
 };
 
-module.exports = { generateRandomString, generateRandomID, checkIfPasswordExists, identifyID, urlsForEachUser, getUserByEmail }
+module.exports = { generateRandomString, generateRandomID, urlsForEachUser, getUserByEmail }
 

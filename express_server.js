@@ -162,7 +162,6 @@ app.post("/login", (req, res) => {
   const enteredPassword = req.body.password;
   const userID = getUserByEmail(enteredEmail, users);
   const targetedUserPassword = users[userID].password;
-  console.log(targetedUserPassword);
 
   if (!userID){
     res.status(403).send("E-mail cannot be found.");
