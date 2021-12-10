@@ -4,75 +4,17 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
+const { checkIfEmailExists, generateRandomString, generateRandomID, checkIfPasswordExists, identifyID, urlsForEachUser } = require('./helpers');
 
+
+//////////////////////////////// MIDDLEWARE ////////////////////////////////
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
 app.use(cookieSession({
   name: 'session',
   keys: ['b10783d2-24ed-4a30-9b84-9c10ea429bfd', 'f56a87b1-5588-4f8a-beb0-3e1b06aa40e2',] 
 }));  
 
-//////////////////////////////// FUNCTIONS  ////////////////////////////////
-
-const generateRandomString = function() {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-  let randomStr = "";
-  for (let i = 0; i < 6; i++) {
-    const randomNum = Math.floor(Math.random() * characters.length);
-    randomStr += characters[randomNum];
-  }
-  return randomStr;
-};
-
-const generateRandomID = function() {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-  let randomStr = "";
-  for (let i = 0; i < 3; i++) {
-    const randomNum = Math.floor(Math.random() * characters.length);
-    randomStr += characters[randomNum];
-  }
-  return randomStr;
-};
-
-const checkIfEmailExists = function(database, enteredEmail) {
-  for (let user in database) {
-    if (database[user].email === enteredEmail) {
-      return true;
-    }
-  }
-  return false;
-};
-
-const checkIfPasswordExists = function(database, enteredPassword) {
-  for (let user in database) {
-    if (bcrypt.compareSync(enteredPassword, database[user].password)) {
-      return true;
-    }
-  }
-  return false;
-};
-
-//returns ID based on the email key of the object
-const identifyID = function(database, enteredEmail){  
-  for (let user in database){
-    if (database[user].email === enteredEmail){
-      let userID = database[user].id
-      return userID;
-    }
-  }
-}
-
-//will return an object where key = shortURL, value = longURL
-const urlsForEachUser = function (database, userID){
-  let urlsObject = {};
-  for (let url in database){
-    if (database[url].userID === userID){
-      urlsObject[url] = database[url].longURL;
-    }
-  }
-  return urlsObject;
-}
 //////////////////////////////// DATABASE ////////////////////////////////
 const urlDatabase = {
   "b2xVn2": {
@@ -118,7 +60,6 @@ app.get("/urls", (req, res) => {
   const user = users[userID];
   const thisUserURL = urlsForEachUser(urlDatabase, userID)
   const templateVars = { urls: urlDatabase, user, thisUserURL };
-  console.log("urlsDatabase", urlDatabase)
   res.render('urls_index', templateVars);
 });
 
@@ -150,7 +91,6 @@ app.get("/urls/:shortURL", (req, res) => {
     return;
   }
   if (urlDatabase[shortURL].userID !== userID){
-    console.log("Please")
     res.status(403).send("You cannot access this page!");
     return;
   }
@@ -198,6 +138,7 @@ app.post("/register", (req, res) => {
     res.status(400).send("That's an error. Please enter a valid email address and password.");
     res.end();
   } else if (checkIfEmailExists(users, enteredEmail)) {
+    console.log(checkIfEmailExists(users, enteredEmail))
     res.status(400).send("That's an error. This email is used by another account.");
     res.end();
   } else {
@@ -206,7 +147,6 @@ app.post("/register", (req, res) => {
     users[userID] = { id: userID, email:req.body.email, password:hashedPassword }; //addind the new registration to users database
     req.session.user_id = userID; 
     res.redirect("/urls");
-    console.log("users database", users)
   }
 });
 
