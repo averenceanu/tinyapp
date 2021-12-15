@@ -32,12 +32,12 @@ const users = {
   "001" : {
     id: "001",
     email: "alex@example.com",
-    password: "hello1",
+    password: bcrypt.hashSync("hello1", 10) //"hello1",
   },
   "002": {
     id: "002",
     email: "alice@example.com",
-    password: "hello2",
+    password: bcrypt.hashSync("hello2", 10) //"hello2",
   }
 };
 
@@ -167,7 +167,7 @@ app.post("/login", (req, res) => {
     res.status(403).send("E-mail cannot be found.");
     res.end();
   }
-  if (bcrypt.compareSync(enteredPassword,targetedUserPassword)) {
+  if (!bcrypt.compareSync(enteredPassword,targetedUserPassword)) {
     res.status(403).send("Password does not match.");
     res.end();
   }
