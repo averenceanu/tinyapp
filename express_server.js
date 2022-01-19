@@ -161,19 +161,19 @@ app.post("/login", (req, res) => {
   const enteredEmail = req.body.email;
   const enteredPassword = req.body.password;
   const userID = getUserByEmail(enteredEmail, users);
-  const targetedUserPassword = users[userID].password;
+  //const targetedUserPassword = users[userID].password;
 
   if (!userID){
     res.status(403).send("E-mail cannot be found.");
     res.end();
   }
-  if (!bcrypt.compareSync(enteredPassword,targetedUserPassword)) {
+  if (!bcrypt.compareSync(enteredPassword,users[userID].password)) {
     res.status(403).send("Password does not match.");
     res.end();
   }
   else {
     //const userID = identifyID(users, enteredEmail);
-    users[userID] = { id: userID, email:req.body.email, password:req.body.password}; //assigning a new ID to user
+    //users[userID] = { id: userID, email:req.body.email, password:req.body.password}; //assigning a new ID to user
     req.session.user_id = userID; 
     res.redirect("/urls");
   }
